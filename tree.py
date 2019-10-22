@@ -1,6 +1,8 @@
 from itertools import groupby
 from math import log
 
+from distribution import Distribution
+
 
 OPERATIONS = {
     '==': lambda x, a: x == a,
@@ -39,17 +41,17 @@ def partition(rows, column, operation, pivot):
 
 class Node:
     def __init__(self, **kwargs):
-        if 'values' in kwargs:
+        if 'distribution' in kwargs:
             # leaf
             assert all([
                 key not in kwargs for key in
                 ['column', 'operation', 'pivot', 'positive_branch', 'negative_branch']
             ])
-            self.values = kwargs.get('values')
+            self.distribution = kwargs.get('distribution')
         else:
             # inner node
-            assert 'values' not in kwargs
-            self.values = None
+            assert 'distribution' not in kwargs
+            self.distribution = None
             self.column = kwargs.get('column')
             self.operation = kwargs.get('operation')
             assert self.operation in OPERATIONS.keys()
@@ -63,8 +65,8 @@ class Node:
         def append(s):
             nonlocal result
             result += indent + s + '\n'
-        if self.values:
-            append(str(self.values))
+        if self.distribution:
+            append(str(self.distribution))
         else:
             append('{} {} {} ?'.format(self.column, self.operation, self.pivot))
             append('T:')
@@ -74,17 +76,24 @@ class Node:
         return result
 
     def classify(self, row):
-        if self.values:
-           return self.values
+        if self.distribution:
+           return self.distribution
         else:
-            if OPERATIONS[self.operation](row[self.column], self.pivot):
-                return self.positive_branch.classify(row)
+            value = row[self.column]
+            if value == '':
+                return (
+                    self.positive_branch.classify(row)
+                    + self.negative_branch.classify(row)
+                )
             else:
-                return self.negative_branch.classify(row)
+                if OPERATIONS[self.operation](value, self.pivot):
+                    return self.positive_branch.classify(row)
+                else:
+                    return self.negative_branch.classify(row)
 
 def build_tree(columns, target_column, rows, score_function):
     if not rows:
-        return Node(values={})
+        return Node(distribution=Distribution({}))
 
     best_partition = {}
     score = score_function(rows, target_column)
@@ -135,5 +144,5 @@ def build_tree(columns, target_column, rows, score_function):
         )
     else:
         return Node(
-            values=value_counts(rows, target_column),
+            distribution=Distribution(value_counts(rows, target_column))
         )

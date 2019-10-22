@@ -63,7 +63,7 @@ def main(args):
         print(
             '{} -> {}'.format(
                 ', '.join([':'.join((key, str(value))) for (key, value) in list(row.items())]),
-                tree.classify(row)
+                tree.classify(row).normalized()
             )
         )
 
