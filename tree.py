@@ -5,13 +5,13 @@ from math import log
 OPERATIONS = {
     '==': lambda x, a: x == a,
     # numbers only:
-    '>' : lambda x, a: x > a,
     '<': lambda x, a: x < a,
+    '>': lambda x, a: x > a,
 }
 
 def operations_for(value):
     if isinstance(value, (int, float)):
-        return ('==', '>', '<')
+        return ('<', '>', '==')
     elif isinstance(value, str):
         return ('==',)
     else:
@@ -23,6 +23,9 @@ def entropy(rows, column):
         p = count / len(rows)
         result -= p * log(p)
     return result
+
+def gini_impurity(rows, column):
+    return 0 # TODO
 
 def value_counts(rows, column):
     values = [row[column] for row in rows]
@@ -70,8 +73,14 @@ class Node:
             result += self.negative_branch.__str__(level + 1)
         return result
 
-    def classify(self, value):
-        return {'a': 1} #TODO
+    def classify(self, row):
+        if self.values:
+           return self.values
+        else:
+            if OPERATIONS[self.operation](row[self.column], self.pivot):
+                return self.positive_branch.classify(row)
+            else:
+                return self.negative_branch.classify(row)
 
 def build_tree(columns, target_column, rows, score_function):
     if not rows:
