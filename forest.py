@@ -12,7 +12,8 @@ def type_cast(rows, columns):
         for suffix, function in castings.items():
             if column.endswith(suffix):
                 for row in rows:
-                    row[column] = function(row[column])
+                    if row[column] != '':
+                        row[column] = function(row[column])
 
 def main(args):
     parser = argparse.ArgumentParser(description='Random forest predictor')
