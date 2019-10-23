@@ -18,10 +18,14 @@ class Distribution:
         return Distribution(result)
 
     def score(self, score_type):
-        return self.entropy()
+        assert score_type in ('entropy', 'gini')
+        return {
+            'entropy': self.entropy,
+            'gini': self.gini_impurity,
+        }[score_type]()
 
     def entropy(self):
         return sum([-p * log(p) for (_, p) in self.normalized().items()])
 
     def gini_impurity(self):
-        result = 0 # TODO
+        return sum([p * (1 - p) for (_, p) in self.normalized().items()])
