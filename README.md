@@ -4,5 +4,5 @@ A random forest classifier (being) written from scratch in Python. Playing with 
 
 Usage:
 ```
-./forest.py --target_column "foobar" training.csv test.csv
+./classifier.py --target_column "foobar" training.csv test.csv
 ```
