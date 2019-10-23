@@ -1,5 +1,4 @@
 from itertools import groupby
-from math import log
 
 from distribution import Distribution
 
@@ -18,16 +17,6 @@ def operations_for(value):
         return ('==',)
     else:
         return ()
-
-def entropy(rows, column):
-    result = 0
-    for (value, count) in value_counts(rows, column).items():
-        p = count / len(rows)
-        result -= p * log(p)
-    return result
-
-def gini_impurity(rows, column):
-    return 0 # TODO
 
 def value_counts(rows, column):
     values = [row[column] for row in rows]
@@ -91,12 +80,12 @@ class Node:
                 else:
                     return self.negative_branch.classify(row)
 
-def build_tree(columns, target_column, rows, score_function):
+def build_tree(columns, target_column, rows, score_type):
     if not rows:
         return Node(distribution=Distribution({}))
 
     best_partition = {}
-    score = score_function(rows, target_column)
+    score = Distribution(value_counts(rows, target_column)).score(score_type)
 
     for column in [column for column in columns if column != target_column]:
         column_value_set = {row[column] for row in rows}
@@ -110,8 +99,8 @@ def build_tree(columns, target_column, rows, score_function):
                 positive_rows, negative_rows = partition(rows, column, operation, pivot)
                 score_gain = (
                     score
-                    - (len(positive_rows) / len(rows)) * score_function(positive_rows, target_column)
-                    - (len(negative_rows) / len(rows)) * score_function(negative_rows, target_column)
+                    - (len(positive_rows) / len(rows)) * Distribution(value_counts(positive_rows, target_column)).score(score_type)
+                    - (len(negative_rows) / len(rows)) * Distribution(value_counts(negative_rows, target_column)).score(score_type)
                 )
 
                 if score_gain > best_partition.get('score_gain', 0.0):
@@ -133,13 +122,13 @@ def build_tree(columns, target_column, rows, score_function):
                 columns=columns,
                 target_column=target_column,
                 rows=best_partition['positive_rows'],
-                score_function=score_function
+                score_type=score_type
             ),
             negative_branch=build_tree(
                 columns=columns,
                 target_column=target_column,
                 rows=best_partition['negative_rows'],
-                score_function=score_function
+                score_type=score_type
             ),
         )
     else:

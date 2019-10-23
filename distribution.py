@@ -1,3 +1,5 @@
+from math import log
+
 class Distribution:
     def __init__(self, value_counts):
         self.value_counts = value_counts
@@ -14,3 +16,12 @@ class Distribution:
         for value, count in x.value_counts.items():
             result[value] = result.get(value, 0) + count
         return Distribution(result)
+
+    def score(self, score_type):
+        return self.entropy()
+
+    def entropy(self):
+        return sum([-p * log(p) for (_, p) in self.normalized().items()])
+
+    def gini_impurity(self):
+        result = 0 # TODO

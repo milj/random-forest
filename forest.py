@@ -1,4 +1,4 @@
-from tree import build_tree, entropy
+from tree import build_tree
 
 
 class Forest:
@@ -7,7 +7,7 @@ class Forest:
             columns=columns,
             target_column=target_column,
             rows=rows,
-            score_function=entropy,
+            score_type='entropy',
         )
         print(self._tree)
 

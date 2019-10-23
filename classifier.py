@@ -3,6 +3,7 @@
 import argparse
 import csv
 import sys
+
 from forest import Forest
 
 
@@ -14,7 +15,6 @@ def type_cast(rows, columns):
                 for row in rows:
                     if row[column] != '':
                         row[column] = function(row[column])
-
 
 def main(args):
     parser = argparse.ArgumentParser(description='Random forest predictor')
@@ -59,6 +59,7 @@ def main(args):
         rows=training_rows,
     )
 
+    # TODO CSV output
     for row in test_rows:
         print(
             '{} -> {}'.format(
@@ -66,7 +67,6 @@ def main(args):
                 forest.classify(row)
             )
         )
-
 
 if __name__ == '__main__':
     main(sys.argv[1:])
