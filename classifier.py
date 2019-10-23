@@ -17,7 +17,7 @@ def type_cast(rows, columns):
                         row[column] = function(row[column])
 
 def main(args):
-    parser = argparse.ArgumentParser(description='Random forest predictor')
+    parser = argparse.ArgumentParser(description='Random forest classifier')
     parser.add_argument(
         'training_dataset',
         help='CSV file containing the training dataset file',
@@ -53,7 +53,7 @@ def main(args):
     type_cast(test_rows, test_columns)
 
     forest = Forest(
-        size=1, # TODO create more than one tree in there
+        size=1,
         columns=training_columns,
         target_column=target_column,
         rows=training_rows,

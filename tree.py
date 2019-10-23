@@ -13,10 +13,9 @@ OPERATIONS = {
 def operations_for(value):
     if isinstance(value, (int, float)):
         return ('<', '>', '==')
-    elif isinstance(value, str):
+    if isinstance(value, str):
         return ('==',)
-    else:
-        return ()
+    return ()
 
 def value_counts(rows, column):
     values = [row[column] for row in rows]
@@ -24,8 +23,8 @@ def value_counts(rows, column):
 
 def partition(rows, column, operation, pivot):
     return (
-        [row for row in rows if OPERATIONS[operation](row[column], pivot)],
-        [row for row in rows if not OPERATIONS[operation](row[column], pivot)]
+        [row for row in rows if row[column] == '' or OPERATIONS[operation](row[column], pivot)],
+        [row for row in rows if row[column] == '' or not OPERATIONS[operation](row[column], pivot)]
     )
 
 class Node:
@@ -66,19 +65,19 @@ class Node:
 
     def classify(self, row):
         if self.distribution:
-           return self.distribution
+            return self.distribution
+
+        value = row[self.column]
+        if value == '':
+            return (
+                self.positive_branch.classify(row)
+                + self.negative_branch.classify(row)
+            )
+
+        if OPERATIONS[self.operation](value, self.pivot):
+            return self.positive_branch.classify(row)
         else:
-            value = row[self.column]
-            if value == '':
-                return (
-                    self.positive_branch.classify(row)
-                    + self.negative_branch.classify(row)
-                )
-            else:
-                if OPERATIONS[self.operation](value, self.pivot):
-                    return self.positive_branch.classify(row)
-                else:
-                    return self.negative_branch.classify(row)
+            return self.negative_branch.classify(row)
 
 def build_tree(columns, target_column, rows, score_type):
     if not rows:
@@ -88,19 +87,27 @@ def build_tree(columns, target_column, rows, score_type):
     score = Distribution(value_counts(rows, target_column)).score(score_type)
 
     for column in [column for column in columns if column != target_column]:
-        column_value_set = {row[column] for row in rows}
+        column_value_set = {row[column] for row in rows} - {''}
         assert (
-            # all values have the same operations
-            len({operations_for(value) for value in column_value_set}) == 1
+            # all values have the same operations, or no data
+            len({operations_for(value) for value in column_value_set}) <= 1
         )
+        if len(column_value_set) == 0:
+            continue
 
         for operation in operations_for(next(iter(column_value_set))):
             for pivot in column_value_set:
+
                 positive_rows, negative_rows = partition(rows, column, operation, pivot)
+
                 score_gain = (
                     score
-                    - (len(positive_rows) / len(rows)) * Distribution(value_counts(positive_rows, target_column)).score(score_type)
-                    - (len(negative_rows) / len(rows)) * Distribution(value_counts(negative_rows, target_column)).score(score_type)
+                    - (len(positive_rows) / len(rows)) * Distribution(
+                        value_counts(positive_rows, target_column)
+                    ).score(score_type)
+                    - (len(negative_rows) / len(rows)) * Distribution(
+                        value_counts(negative_rows, target_column)
+                    ).score(score_type)
                 )
 
                 if score_gain > best_partition.get('score_gain', 0.0):
