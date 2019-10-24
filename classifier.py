@@ -54,7 +54,6 @@ def main(args):
     type_cast(test_rows, test_columns)
 
     forest = Forest(
-        size=1,
         columns=training_columns,
         target_column=target_column,
         rows=training_rows,
