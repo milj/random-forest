@@ -5,5 +5,5 @@ The end goal it to apply it to the Titanic dataset and see how well it performs.
 
 Usage:
 ```
-./classifier.py --target_column "foobar" training.csv test.csv
+./classifier.py -t "foobar" training.csv test.csv
 ```

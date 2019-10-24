@@ -89,7 +89,7 @@ def build_tree(columns, target_column, rows, score_type):
     for column in [column for column in columns if column != target_column]:
         column_value_set = {row[column] for row in rows} - {''}
         assert (
-            # all values have the same operations, or no data
+            # all values have the same operations, or no values
             len({operations_for(value) for value in column_value_set}) <= 1
         )
         if len(column_value_set) == 0:

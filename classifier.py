@@ -31,6 +31,7 @@ def main(args):
         type=argparse.FileType('r'),
     )
     parser.add_argument(
+        '-t',
         '--target_column',
         help='Name of the target dataset column (default: last column)',
         metavar='target_column',
