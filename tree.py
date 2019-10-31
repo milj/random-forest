@@ -28,6 +28,8 @@ def partition(rows, column, operation, pivot):
     )
 
 class Node:
+    """A node in a decision tree"""
+
     def __init__(self, **kwargs):
         if 'distribution' in kwargs:
             # leaf
@@ -64,6 +66,8 @@ class Node:
         return result
 
     def classify(self, row):
+        """Recursively walk down the tree, select branches according to results of operations stored in the nodes"""
+
         if self.distribution:
             return self.distribution
 
@@ -71,7 +75,7 @@ class Node:
         if value == '':
             return (
                 self.positive_branch.classify(row)
-                + self.negative_branch.classify(row)
+                + self.negative_branch.classify(row) # here we are using Distribution's __add__ special method
             )
 
         if OPERATIONS[self.operation](value, self.pivot):
@@ -80,6 +84,8 @@ class Node:
             return self.negative_branch.classify(row)
 
 def build_tree(columns, target_column, rows, score_type):
+    """Recursively build a decision tree by finding the best column, value and operation to split on"""
+
     if not rows:
         return Node(distribution=Distribution({}))
 

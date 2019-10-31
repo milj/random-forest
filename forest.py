@@ -6,6 +6,8 @@ from tree import build_tree
 
 
 class Forest:
+    """Random forest is a collection of decision trees that perform decisions collectively"""
+
     def __init__(self, columns, target_column, rows, forest_size=None):
         if not forest_size:
             forest_size = ceil(sqrt(len(rows)))
@@ -28,9 +30,10 @@ class Forest:
             print(tree)
 
     def classify(self, row):
+        """Ask each tree to classify, return the most frequent result"""
+
         outputs = [tree.classify(row).normalized() for tree in self._trees]
         most_probable_values = [sorted(o.items(), key=lambda o: o[1])[-1][0] for o in outputs]
-        # return the most frequent from most_probable_values
         return sorted(
             {x[0]: len(list(x[1])) for x in groupby(sorted(most_probable_values))}.items(),
             key=lambda x: x[1]
